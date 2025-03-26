@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Produk</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Tambah Produk</h2>
+    <form id="form-produk">
+        Nama Produk: <input type="text" id="nama_produk" required>
+        Harga: <input type="number" id="harga" required>
+        Stok: <input type="number" id="stok" required>
+        <input type="submit" value="Tambah Produk">
+    </form>
+
+    <h2>Cari Produk</h2>
+    <input type="text" id="search" placeholder="Cari produk...">
+    <button onclick="cariProduk()">Cari</button>
+
+    <h2>Laporan Stok/Persediaan Produk</h2>
+    <table id="tabel-produk">
+        <tr><th>Nama Produk</th><th>Harga</th><th>Stok</th></tr>
+    </table>
+</div>
+
+<div class="btn-container">
+    <a href="index.html" class="btn-home">Kembali ke Home</a>
+</div>
+
+<script>
+    let produkList = JSON.parse(localStorage.getItem('produkList')) || [];
+    
+    function simpanProduk() {
+        localStorage.setItem('produkList', JSON.stringify(produkList));
+        tampilkanProduk();
+    }
+    
+    document.getElementById('form-produk').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let nama = document.getElementById('nama_produk').value;
+        let harga = parseInt(document.getElementById('harga').value);
+        let stok = parseInt(document.getElementById('stok').value);
+        if (nama && harga > 0 && stok >= 0) {
+            produkList.push({ nama, harga, stok });
+            simpanProduk();
+        }
+    });
+    
+    function tampilkanProduk(filter = '') {
+        let tabel = document.getElementById('tabel-produk');
+        tabel.innerHTML = '<tr><th>Nama Produk</th><th>Harga</th><th>Stok</th></tr>';
+        produkList.filter(p => p.nama.toLowerCase().includes(filter.toLowerCase())).forEach(p => {
+            let row = tabel.insertRow();
+            row.innerHTML = `<td>${p.nama}</td><td>Rp ${p.harga.toLocaleString()}</td><td>${p.stok}</td>`;
+        });
+    }
+    
+    function cariProduk() {
+        let keyword = document.getElementById('search').value;
+        tampilkanProduk(keyword);
+    }
+    
+    tampilkanProduk();
+</script>
+</body>
+</html>

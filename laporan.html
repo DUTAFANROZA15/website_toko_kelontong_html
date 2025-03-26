@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Penjualan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Laporan Stok Produk</h2>
+        <table id="produkTable">
+            <tr><th>Nama Produk</th><th>Harga</th><th>Stok</th></tr>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Laporan Data Pelanggan</h2>
+        <table id="pelangganTable">
+            <tr><th>Nama Pelanggan</th><th>Kontak</th></tr>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Laporan Faktur Jual</h2>
+        <table id="fakturTable">
+            <tr><th>Pelanggan</th><th>Produk</th><th>Jumlah</th><th>Total</th><th>Tanggal</th></tr>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Rekapitulasi Penjualan Harian</h2>
+        <table id="rekapHarianTable">
+            <tr><th>Tanggal</th><th>Total Penjualan</th></tr>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Rekapitulasi Penjualan Bulanan</h2>
+        <table id="rekapBulananTable">
+            <tr><th>Bulan</th><th>Tahun</th><th>Total Penjualan</th></tr>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Rekapitulasi Penjualan Tahunan</h2>
+        <table id="rekapTahunanTable">
+            <tr><th>Tahun</th><th>Total Penjualan</th></tr>
+        </table>
+    </div>
+
+    <div class="btn-container">
+        <a href="index.html" class="btn-home">Kembali ke Home</a>
+    </div>
+
+    <script>
+        function loadTableData() {
+            let produk = JSON.parse(localStorage.getItem("produk")) || [];
+            let pelanggan = JSON.parse(localStorage.getItem("pelanggan")) || [];
+            let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+            let produkTable = document.getElementById("produkTable");
+            let pelangganTable = document.getElementById("pelangganTable");
+            let fakturTable = document.getElementById("fakturTable");
+            let rekapHarianTable = document.getElementById("rekapHarianTable");
+            let rekapBulananTable = document.getElementById("rekapBulananTable");
+            let rekapTahunanTable = document.getElementById("rekapTahunanTable");
+
+            produk.forEach(p => {
+                produkTable.innerHTML += `<tr><td>${p.nama}</td><td>Rp ${p.harga.toLocaleString()}</td><td>${p.stok}</td></tr>`;
+            });
+
+            pelanggan.forEach(p => {
+                pelangganTable.innerHTML += `<tr><td>${p.nama}</td><td>${p.kontak}</td></tr>`;
+            });
+
+            let rekapHarian = {}, rekapBulanan = {}, rekapTahunan = {};
+
+            transaksi.forEach(t => {
+                fakturTable.innerHTML += `<tr><td>${t.pelanggan}</td><td>${t.produk}</td><td>${t.jumlah}</td><td>Rp ${t.total.toLocaleString()}</td><td>${t.tanggal}</td></tr>`;
+                
+                let date = t.tanggal.split('-');
+                let hari = date.slice(0, 3).join('-');
+                let bulan = date.slice(0, 2).join('-');
+                let tahun = date[0];
+                
+                rekapHarian[hari] = (rekapHarian[hari] || 0) + t.total;
+                rekapBulanan[bulan] = (rekapBulanan[bulan] || 0) + t.total;
+                rekapTahunan[tahun] = (rekapTahunan[tahun] || 0) + t.total;
+            });
+
+            for (let [tgl, total] of Object.entries(rekapHarian)) {
+                rekapHarianTable.innerHTML += `<tr><td>${tgl}</td><td>Rp ${total.toLocaleString()}</td></tr>`;
+            }
+            
+            for (let [bln, total] of Object.entries(rekapBulanan)) {
+                let [tahun, bulan] = bln.split('-');
+                rekapBulananTable.innerHTML += `<tr><td>${bulan}</td><td>${tahun}</td><td>Rp ${total.toLocaleString()}</td></tr>`;
+            }
+            
+            for (let [thn, total] of Object.entries(rekapTahunan)) {
+                rekapTahunanTable.innerHTML += `<tr><td>${thn}</td><td>Rp ${total.toLocaleString()}</td></tr>`;
+            }
+        }
+        
+        window.onload = loadTableData;
+    </script>
+</body>
+</html>

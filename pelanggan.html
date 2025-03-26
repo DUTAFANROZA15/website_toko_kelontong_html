@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Pelanggan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Tambah Pelanggan</h2>
+    <form id="formPelanggan">
+        Nama Pelanggan: <input type="text" id="nama_pelanggan" required>
+        Kontak: <input type="text" id="kontak" required>
+        <input type="submit" value="Tambah Pelanggan">
+    </form>
+
+    <h2>Daftar Pelanggan</h2>
+    <table>
+        <thead>
+            <tr><th>Nama Pelanggan</th><th>Kontak</th></tr>
+        </thead>
+        <tbody id="tabelPelanggan"></tbody>
+    </table>
+</div>
+
+<div class="btn-container">
+    <a href="index.html" class="btn-home">Kembali ke Home</a>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("formPelanggan");
+        const tabelPelanggan = document.getElementById("tabelPelanggan");
+
+        function loadPelanggan() {
+            const pelanggan = JSON.parse(localStorage.getItem("pelanggan")) || [];
+            tabelPelanggan.innerHTML = pelanggan.map(p => `<tr><td>${p.nama}</td><td>${p.kontak}</td></tr>`).join("");
+        }
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const nama = document.getElementById("nama_pelanggan").value.trim();
+            const kontak = document.getElementById("kontak").value.trim();
+            
+            if (nama && kontak) {
+                const pelanggan = JSON.parse(localStorage.getItem("pelanggan")) || [];
+                pelanggan.push({ nama, kontak });
+                localStorage.setItem("pelanggan", JSON.stringify(pelanggan));
+                loadPelanggan();
+                form.reset();
+            } else {
+                alert("❌ Data pelanggan tidak boleh kosong!");
+            }
+        });
+
+        loadPelanggan();
+    });
+</script>
+
+</body>
+</html>

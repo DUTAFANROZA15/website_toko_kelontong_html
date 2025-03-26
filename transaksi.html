@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaksi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Tambah Transaksi</h2>
+    <form id="formTransaksi">
+        Pelanggan: 
+        <select id="id_pelanggan" required>
+            <option value="">-- Pilih Pelanggan --</option>
+        </select>
+        
+        Produk:
+        <select id="id_produk" required>
+            <option value="">-- Pilih Produk --</option>
+        </select>
+        
+        Jumlah: <input type="number" id="jumlah" min="1" required>
+        <button type="submit">Tambah Transaksi</button>
+    </form>
+</div>
+
+<div class="container">
+    <h2>Laporan Transaksi</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Pelanggan</th><th>Produk</th><th>Jumlah</th><th>Total</th><th>Tanggal</th>
+            </tr>
+        </thead>
+        <tbody id="dataTransaksi"></tbody>
+    </table>
+</div>
+
+<div class="btn-container">
+    <a href="index.html" class="btn-home">Kembali ke Home</a>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        loadPelanggan();
+        loadProduk();
+        loadTransaksi();
+    });
+
+    function loadPelanggan() {
+        let pelanggan = JSON.parse(localStorage.getItem("pelanggan")) || [];
+        let select = document.getElementById("id_pelanggan");
+        select.innerHTML = '<option value="">-- Pilih Pelanggan --</option>';
+        pelanggan.forEach(p => {
+            let option = document.createElement("option");
+            option.value = p.id;
+            option.textContent = p.nama;
+            select.appendChild(option);
+        });
+    }
+
+    function loadProduk() {
+        let produk = JSON.parse(localStorage.getItem("produk")) || [];
+        let select = document.getElementById("id_produk");
+        select.innerHTML = '<option value="">-- Pilih Produk --</option>';
+        produk.forEach(p => {
+            let option = document.createElement("option");
+            option.value = p.id;
+            option.textContent = `${p.nama} (Rp ${p.harga})`;
+            select.appendChild(option);
+        });
+    }
+
+    document.getElementById("formTransaksi").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        let pelangganId = document.getElementById("id_pelanggan").value;
+        let produkId = document.getElementById("id_produk").value;
+        let jumlah = parseInt(document.getElementById("jumlah").value);
+        
+        if (!pelangganId || !produkId || jumlah <= 0) {
+            alert("Harap isi semua data dengan benar!");
+            return;
+        }
+
+        let pelanggan = JSON.parse(localStorage.getItem("pelanggan")) || [];
+        let produk = JSON.parse(localStorage.getItem("produk")) || [];
+        let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+        
+        let pelangganNama = pelanggan.find(p => p.id == pelangganId)?.nama;
+        let produkItem = produk.find(p => p.id == produkId);
+        
+        if (!produkItem || produkItem.stok < jumlah) {
+            alert("Stok tidak mencukupi!");
+            return;
+        }
+
+        let total = produkItem.harga * jumlah;
+        produkItem.stok -= jumlah;
+
+        transaksi.push({
+            pelanggan: pelangganNama,
+            produk: produkItem.nama,
+            jumlah,
+            total,
+            tanggal: new Date().toLocaleString()
+        });
+
+        localStorage.setItem("produk", JSON.stringify(produk));
+        localStorage.setItem("transaksi", JSON.stringify(transaksi));
+
+        loadTransaksi();
+        alert("✅ Transaksi berhasil ditambahkan!");
+        document.getElementById("formTransaksi").reset();
+    });
+
+    function loadTransaksi() {
+        let transaksi = JSON.parse(localStorage.getItem("transaksi")) || [];
+        let tbody = document.getElementById("dataTransaksi");
+        tbody.innerHTML = "";
+        transaksi.forEach(t => {
+            let row = `<tr>
+                <td>${t.pelanggan}</td>
+                <td>${t.produk}</td>
+                <td>${t.jumlah}</td>
+                <td>Rp ${t.total}</td>
+                <td>${t.tanggal}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+</script>
+
+</body>
+</html>
